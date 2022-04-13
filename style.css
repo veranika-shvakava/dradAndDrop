@@ -1,0 +1,41 @@
+.sceleton {
+  display: flex;
+  gap: 20px;
+}
+
+.menu,
+.canvas {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  overflow: hidden;
+}
+
+.body-canvas {
+  width: 500px;
+  height: 500px;
+  border: 1px solid black;
+  border-radius: 5px;
+  padding: 10px;
+  /* position: relative; */
+}
+
+.square {
+  width: 100px;
+  height: 100px;
+  position: absolute;
+  z-index: 1000;
+  /* background-color: seagreen; */
+}
+
+.triangle {
+  width: 0;
+  height: 0;
+  border-left: 50px solid transparent;
+  border-right: 50px solid transparent;
+  border-bottom-width: 100px;
+  border-bottom-style: solid;
+  position: absolute;
+  z-index: 1000;
+}

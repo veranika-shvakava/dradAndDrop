@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="./style.css">
+  <title>Drag and Drop</title>
+</head>
+
+<body>
+  <div class="sceleton">
+    <div class="menu">
+      <h4>Меню</h4>
+      <div>
+        <span>Фигура:</span>
+        <select name="figures" id="figures">
+          <option value="square" selected>Квадрат</option>
+          <option value="triangle">Треугольник</option>
+        </select>
+      </div>
+      <div>
+        <span>Цвет:</span>
+        <select name="colors" id="colors" class="colors">
+          <option value="red" selected>Красный</option>
+          <option value="blue">Синий</option>
+          <option value="green">Зеленый</option>
+        </select>
+      </div>
+      <button class="add-btn">Добавить</button>
+    </div>
+    <div>
+      <h4>Полотно</h4>
+      <div class="canvas-block"></div>
+    </div>
+  </div>
+
+  <script src="./script.js"></script>
+</body>
+
+</html>
