@@ -18,7 +18,8 @@
   border: 1px solid black;
   border-radius: 5px;
   padding: 10px;
-  /* position: relative; */
+  /* position: relative;
+  overflow: hidden; */
 }
 
 .square {
@@ -26,7 +27,6 @@
   height: 100px;
   position: absolute;
   z-index: 1000;
-  /* background-color: seagreen; */
 }
 
 .triangle {

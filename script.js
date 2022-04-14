@@ -1,97 +1,96 @@
 const canvasBlock = document.querySelector('.canvas-block');
-const figures = document.getElementById('figures');
-const colors = document.getElementById('colors');
+const figures = document.querySelectorAll('#figures > option');
+const colors = document.querySelectorAll('#colors > option');
 const addBtn = document.querySelector('.add-btn');
 
+const div = document.createElement('div');
+
 class Figure {
-  constructor() {
-    this.div = document.createElement('div');
+  constructor(name, div) {
+    this.name = name;
+    this.div = div;
   };
 
-  createCarcass = () => {
+  createCanvas = () => {
     canvasBlock.append(this.div);
     this.div.setAttribute('class', 'body-canvas');
   };
 
-  createFigure = (name) => {
-    const canvas = document.querySelector('.body-canvas');
-    const tag = document.createElement('div');
-
-    canvas.append(tag);
-    tag.setAttribute('class', name);
-  };
-
   clearCanvas = () => {
-    while (canvasBlock.firstChild) {
-      canvasBlock.firstChild.remove();
-    };
+    this.div.firstChild.remove();
   };
 
-  sortOutFigures = () => {
-    for (let i = 0; i < figures.length; i++) {
-      const figure = figures[i];
-
-      if (figure.selected) {
-        if (figure.value === 'square') {
-          this.createFigure(figure.value);
-          return figure.value;
-        } else if (figure.value === 'triangle') {
-          this.createFigure(figure.value);
-          return figure.value;
-        }
-      };
-    };
-  };
-
-  sortOutColors = (figure) => {
-    for (let i = 0; i < colors.length; i++) {
-      const color = colors[i];
-
+  sortColor = (name) => {
+    colors.forEach(color => {
       if (color.selected) {
-        if (color.value === 'red') {
-          figure === 'square'
-            ? document.getElementsByClassName(figure)[0].style.backgroundColor = 'red'
-            : document.getElementsByClassName(figure)[0].style.borderBottomColor = 'red';
-        } else if (color.value === 'blue') {
-          figure === 'square'
-            ? document.getElementsByClassName(figure)[0].style.backgroundColor = 'blue'
-            : document.getElementsByClassName(figure)[0].style.borderBottomColor = 'blue';
-        } else if (color.value === 'green') {
-          figure === 'square'
-            ? document.getElementsByClassName(figure)[0].style.backgroundColor = 'green'
-            : document.getElementsByClassName(figure)[0].style.borderBottomColor = 'green';
+        console.log(color.value);
+
+        if (name === 'square') {
+          switch (color.value) {
+            case 'red':
+              this.div.firstChild.style.backgroundColor = 'firebrick';
+              break;
+            case 'blue':
+              this.div.firstChild.style.backgroundColor = 'cornflowerblue';
+              break;
+            case 'green':
+              this.div.firstChild.style.backgroundColor = 'seagreen';
+              break;
+          }
+        } else if (name === 'triangle') {
+          this.div.firstChild.style.backgroundColor = 'transparent';
+
+          switch (color.value) {
+            case 'red':
+              this.div.firstChild.style.borderBottomColor = 'firebrick';
+              break;
+            case 'blue':
+              this.div.firstChild.style.borderBottomColor = 'cornflowerblue';
+              break;
+            case 'green':
+              this.div.firstChild.style.borderBottomColor = 'seagreen';
+              break;
+          }
         }
-      };
-    };
+      }
+    });
   };
 
-  selectedMenu = () => {
-    this.sortOutColors(this.sortOutFigures());
+  createFigure = () => {
+    const figure = document.createElement('div');
+
+    this.div.append(figure);
+    figure.setAttribute('class', this.name);
+
+    this.sortColor(this.name);
   };
 
-  moveAt = (pageX, pageY) => {
-    elem.style.left = pageX - elem.offsetWidth / 2 + 'px';
-    elem.style.top = pageY - elem.offsetHeight / 2 + 'px';
-  };
-
-  onMouseMove = (event) => {
-    this.moveAt(event.pageX, event.pageY);
+  moveAt = (pageX, pageY, elem, shiftX, shiftY) => {
+    elem.style.left = pageX - shiftX + 'px';
+    elem.style.top = pageY - shiftY + 'px';
   };
 
   draggable = (elem) => {
-    elem = canvasBlock.firstChild.firstChild;
+    this.elem = elem;
 
-    elem.onmousedown = (event) => {
-      this.moveAt(event.pageX, event.pageY);
+    this.elem.onmousedown = (event) => {
+      let shiftX = event.clientX - this.elem.getBoundingClientRect().left;
+      let shiftY = event.clientY - this.elem.getBoundingClientRect().top;
 
-      document.addEventListener('mousemove', this.onMouseMove);
+      this.moveAt(event.pageX, event.pageY, this.elem, shiftX, shiftY);
 
-      elem.onmouseup = () => {
-        document.removeEventListener('mousemove', this.onMouseMove);
-        elem.onmouseup = null;
+      const onMouseMove = (event) => {
+        this.moveAt(event.pageX, event.pageY, this.elem, shiftX, shiftY);
+      }
+
+      document.addEventListener('mousemove', onMouseMove);
+
+      this.elem.onmouseup = () => {
+        document.removeEventListener('mousemove', onMouseMove);
+        this.elem.onmouseup = null;
       };
 
-      elem.ondragstart = () => {
+      this.elem.ondragstart = () => {
         return false;
       };
     };
@@ -102,133 +101,40 @@ class Square extends Figure {
   constructor(...args) {
     super(...args);
   };
+
+  finall = (canvas) => {
+    if (canvas) this.clearCanvas();
+
+    this.createCanvas();
+    this.createFigure();
+    this.draggable(canvasBlock.firstChild.firstChild);
+  }
 };
 
-class Triangle extends Figure {
+class Triangle extends Square {
   constructor(...args) {
     super(...args);
   };
 };
 
-const square = new Square();
-const triangle = new Triangle();
-
 addBtn.addEventListener('click', () => {
-  square.createCarcass();
-  for (let i = 0; i < figures.length; i++) {
-    const figure = figures[i];
+  const canvasBody = document.querySelector('.body-canvas');
 
-    square.createFigure(figure);
-  }
-  square.selectedMenu();
+  const square = new Square('square', div);
+  const triangle = new Triangle('triangle', div);
+
+  figures.forEach(item => {
+    if (item.selected) {
+      console.log(item.value);
+
+      switch (item.value) {
+        case 'square':
+          square.finall(canvasBody);
+          break;
+        case 'triangle':
+          triangle.finall(canvasBody);
+          break;
+      };
+    };
+  });
 });
-
-
-// triangle.createCarcass();
-// triangle.createFigure('triangle');
-
-/* const sortOutFigures = () => {
-  for (let i = 0; i < figures.length; i++) {
-    const figure = figures[i];
-
-    if (figure.selected) {
-      if (figure.value === 'square') {
-        square();
-        return figure.value;
-      } else if (figure.value === 'triangle') {
-        triangle();
-        return figure.value;
-      }
-    }
-  }
-} */
-
-/* const sortOutColors = (figure) => {
-  for (let i = 0; i < colors.length; i++) {
-    const color = colors[i];
-
-    if (color.selected) {
-      if (color.value === 'red') {
-        figure === 'square'
-          ? document.getElementsByClassName(figure)[0].style.backgroundColor = 'red'
-          : document.getElementsByClassName(figure)[0].style.borderBottomColor = 'red';
-      } else if (color.value === 'blue') {
-        figure === 'square'
-          ? document.getElementsByClassName(figure)[0].style.backgroundColor = 'blue'
-          : document.getElementsByClassName(figure)[0].style.borderBottomColor = 'blue';
-      } else if (color.value === 'green') {
-        figure === 'square'
-          ? document.getElementsByClassName(figure)[0].style.backgroundColor = 'green'
-          : document.getElementsByClassName(figure)[0].style.borderBottomColor = 'green';
-      }
-    }
-  }
-} */
-
-/* const selectedMenu = () => {
-  sortOutColors(sortOutFigures());
-} */
-
-/* const bodyForCanvas = () => {
-  const bodyCanvas = document.createElement('div');
-
-  canvasBlock.append(bodyCanvas);
-  bodyCanvas.setAttribute('class', 'body-canvas');
-} */
-
-/* const clearCanvas = () => {
-  while (canvasBlock.firstChild) {
-    canvasBlock.firstChild.remove();
-  }
-} */
-
-/* const square = () => {
-  const canvas = document.querySelector('.body-canvas');
-  const square = document.createElement('div');
-
-  canvas.append(square);
-  square.setAttribute('class', 'square');
-} */
-
-/* const triangle = () => {
-  const canvas = document.querySelector('.body-canvas');
-  const triangle = document.createElement('div');
-
-  canvas.append(triangle);
-  triangle.setAttribute('class', 'triangle');
-} */
-
-/* const draggable = (elem) => {
-  elem = canvasBlock.firstChild.firstChild;
-
-  elem.onmousedown = (event) => {
-    const moveAt = (pageX, pageY) => {
-      elem.style.left = pageX - elem.offsetWidth / 2 + 'px';
-      elem.style.top = pageY - elem.offsetHeight / 2 + 'px';
-    }
-
-    moveAt(event.pageX, event.pageY);
-
-    const onMouseMove = (event) => {
-      moveAt(event.pageX, event.pageY);
-    }
-
-    document.addEventListener('mousemove', onMouseMove);
-
-    elem.onmouseup = () => {
-      document.removeEventListener('mousemove', onMouseMove);
-      elem.onmouseup = null;
-    };
-
-    elem.ondragstart = () => {
-      return false;
-    };
-  };
-} */
-
-/* addBtn.addEventListener('click', () => {
-  clearCanvas();
-  bodyForCanvas();
-  selectedMenu();
-  draggable();
-}); */
