@@ -18,6 +18,9 @@
   border: 1px solid black;
   border-radius: 5px;
   padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   /* position: relative;
   overflow: hidden; */
 }
@@ -40,6 +43,21 @@
   z-index: 1000;
 }
 
+.circle {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  position: absolute;
+  z-index: 1000;
+}
+
+.rectangle {
+  width: 200px;
+  height: 100px;
+  position: absolute;
+  z-index: 1000;
+}
+
 .firebrick {
   background-color: firebrick;
   border-bottom-color: firebrick;
@@ -53,4 +71,9 @@
 .seagreen {
   background-color: seagreen;
   border-bottom-color: seagreen;
+}
+
+.sandybrown {
+  background-color: sandybrown;
+  border-bottom-color: sandybrown;
 }

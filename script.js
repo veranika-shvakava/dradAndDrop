@@ -39,6 +39,9 @@ class Figure {
           case 'green':
             pattern.classList.add('seagreen');
             break;
+          case 'sandy':
+            pattern.classList.add('sandybrown');
+            break;
         };
       };
     });
@@ -59,6 +62,14 @@ class Figure {
   };
 
   draggable = (elem) => {
+    /* const borderCanvas = {
+      top: this.div.offsetTop,
+      right: this.div.offsetWidth + this.div.offsetLeft - this.div.firstChild.offsetWidth,
+      bottom: this.div.offsetHeight + this.div.offsetTop - this.div.firstChild.offsetHeight,
+      left: this.div.offsetLeft,
+    };
+    console.log(`😈 ~ borderCanvas`, borderCanvas); */
+
     elem.onmousedown = (event) => {
       let shiftX = event.clientX - elem.getBoundingClientRect().left;
       let shiftY = event.clientY - elem.getBoundingClientRect().top;
@@ -66,7 +77,25 @@ class Figure {
       this.moveAt(event.pageX, event.pageY, elem, shiftX, shiftY);
 
       const onMouseMove = (event) => {
+        // const newLocation = {
+        //   x: borderCanvas.left,
+        //   y: borderCanvas.top
+        // };
+
+        // if (event.pageX > borderCanvas.right) {
+        //   newLocation.x = borderCanvas.right;
+        // } else if (event.pageX > borderCanvas.left) {
+        //   newLocation.x = event.pageX;
+        // }
+
+        // if (event.pageY > borderCanvas.bottom) {
+        //   newLocation.y = borderCanvas.bottom;
+        // } else if (event.pageY > borderCanvas.top) {
+        //   newLocation.y = event.pageY;
+        // }
+
         this.moveAt(event.pageX, event.pageY, elem, shiftX, shiftY);
+        // this.moveAt(newLocation.x, newLocation.y, elem, shiftX, shiftY);
       };
 
       document.addEventListener('mousemove', onMouseMove);
@@ -103,11 +132,25 @@ class Triangle extends Square {
   };
 };
 
+class Сircle extends Triangle {
+  constructor(...args) {
+    super(...args);
+  };
+};
+
+class Rectangle extends Сircle {
+  constructor(...args) {
+    super(...args);
+  };
+};
+
 addBtn.addEventListener('click', () => {
   const canvasBody = document.querySelector('.body-canvas');
 
   const square = new Square('square', div);
   const triangle = new Triangle('triangle', div);
+  const circle = new Сircle('circle', div);
+  const rectangle = new Rectangle('rectangle', div);
 
   figures.forEach(item => {
     if (item.selected) {
@@ -119,6 +162,12 @@ addBtn.addEventListener('click', () => {
           break;
         case 'triangle':
           triangle.finall(canvasBody);
+          break;
+        case 'circle':
+          circle.finall(canvasBody);
+          break;
+        case 'rectangle':
+          rectangle.finall(canvasBody);
           break;
       };
     };
