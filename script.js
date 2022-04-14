@@ -59,26 +59,24 @@ class Figure {
   };
 
   draggable = (elem) => {
-    this.elem = elem;
+    elem.onmousedown = (event) => {
+      let shiftX = event.clientX - elem.getBoundingClientRect().left;
+      let shiftY = event.clientY - elem.getBoundingClientRect().top;
 
-    this.elem.onmousedown = (event) => {
-      let shiftX = event.clientX - this.elem.getBoundingClientRect().left;
-      let shiftY = event.clientY - this.elem.getBoundingClientRect().top;
-
-      this.moveAt(event.pageX, event.pageY, this.elem, shiftX, shiftY);
+      this.moveAt(event.pageX, event.pageY, elem, shiftX, shiftY);
 
       const onMouseMove = (event) => {
-        this.moveAt(event.pageX, event.pageY, this.elem, shiftX, shiftY);
-      }
+        this.moveAt(event.pageX, event.pageY, elem, shiftX, shiftY);
+      };
 
       document.addEventListener('mousemove', onMouseMove);
 
-      this.elem.onmouseup = () => {
+      elem.onmouseup = () => {
         document.removeEventListener('mousemove', onMouseMove);
-        this.elem.onmouseup = null;
+        elem.onmouseup = null;
       };
 
-      this.elem.ondragstart = () => {
+      elem.ondragstart = () => {
         return false;
       };
     };
@@ -96,7 +94,7 @@ class Square extends Figure {
     this.createCanvas();
     this.createFigure();
     this.draggable(canvasBlock.firstChild.firstChild);
-  }
+  };
 };
 
 class Triangle extends Square {
