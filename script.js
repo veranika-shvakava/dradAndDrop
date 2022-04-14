@@ -25,34 +25,22 @@ class Figure {
       if (color.selected) {
         console.log(color.value);
 
-        if (name === 'square') {
-          switch (color.value) {
-            case 'red':
-              this.div.firstChild.style.backgroundColor = 'firebrick';
-              break;
-            case 'blue':
-              this.div.firstChild.style.backgroundColor = 'cornflowerblue';
-              break;
-            case 'green':
-              this.div.firstChild.style.backgroundColor = 'seagreen';
-              break;
-          }
-        } else if (name === 'triangle') {
-          this.div.firstChild.style.backgroundColor = 'transparent';
+        const pattern = this.div.firstChild;
 
-          switch (color.value) {
-            case 'red':
-              this.div.firstChild.style.borderBottomColor = 'firebrick';
-              break;
-            case 'blue':
-              this.div.firstChild.style.borderBottomColor = 'cornflowerblue';
-              break;
-            case 'green':
-              this.div.firstChild.style.borderBottomColor = 'seagreen';
-              break;
-          }
-        }
-      }
+        if (name === 'triangle') pattern.style.backgroundColor = 'transparent';
+
+        switch (color.value) {
+          case 'red':
+            pattern.classList.add('firebrick');
+            break;
+          case 'blue':
+            pattern.classList.add('cornflowerblue');
+            break;
+          case 'green':
+            pattern.classList.add('seagreen');
+            break;
+        };
+      };
     });
   };
 

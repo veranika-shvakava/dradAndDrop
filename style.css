@@ -39,3 +39,18 @@
   position: absolute;
   z-index: 1000;
 }
+
+.firebrick {
+  background-color: firebrick;
+  border-bottom-color: firebrick;
+}
+
+.cornflowerblue {
+  background-color: cornflowerblue;
+  border-bottom-color: cornflowerblue;
+}
+
+.seagreen {
+  background-color: seagreen;
+  border-bottom-color: seagreen;
+}
