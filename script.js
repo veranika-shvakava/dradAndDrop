@@ -12,37 +12,25 @@ class Figure {
   };
 
   createCanvas = () => {
+    const bodyCanvas = 'body-canvas';
+
     canvasBlock.append(this.div);
-    this.div.setAttribute('class', 'body-canvas');
+    this.div.setAttribute('class', bodyCanvas);
   };
 
-  clearCanvas = () => {
-    this.div.firstChild.remove();
-  };
+  clearCanvas = () => this.div.firstChild.remove();
 
   sortColor = (name) => {
     colors.forEach(color => {
-      if (color.selected) {
-        console.log(color.value);
+      const { selected, value } = color;
 
+      if (selected) {
         const pattern = this.div.firstChild;
+        const transparent = 'transparent';
 
-        if (name === 'triangle') pattern.style.backgroundColor = 'transparent';
+        if (name === 'triangle') pattern.style.backgroundColor = transparent;
 
-        switch (color.value) {
-          case 'red':
-            pattern.classList.add('firebrick');
-            break;
-          case 'blue':
-            pattern.classList.add('cornflowerblue');
-            break;
-          case 'green':
-            pattern.classList.add('seagreen');
-            break;
-          case 'sandy':
-            pattern.classList.add('sandybrown');
-            break;
-        };
+        return pattern.classList.add(value);
       };
     });
   };
@@ -56,46 +44,39 @@ class Figure {
     this.sortColor(this.name);
   };
 
-  moveAt = (pageX, pageY, elem, shiftX, shiftY) => {
-    elem.style.left = pageX - shiftX + 'px';
-    elem.style.top = pageY - shiftY + 'px';
+  moveAt = (elem, newLocation) => {
+    const { x, y } = newLocation;
+
+    elem.style.left = `${x}px`;
+    elem.style.top = `${y}px`;
   };
 
   draggable = (elem) => {
-    /* const borderCanvas = {
+    let limits = {
       top: this.div.offsetTop,
-      right: this.div.offsetWidth + this.div.offsetLeft - this.div.firstChild.offsetWidth,
-      bottom: this.div.offsetHeight + this.div.offsetTop - this.div.firstChild.offsetHeight,
+      right: this.div.offsetWidth + this.div.offsetLeft - elem.offsetWidth,
+      bottom: this.div.offsetHeight + this.div.offsetTop - elem.offsetHeight,
       left: this.div.offsetLeft,
     };
-    console.log(`😈 ~ borderCanvas`, borderCanvas); */
 
     elem.onmousedown = (event) => {
-      let shiftX = event.clientX - elem.getBoundingClientRect().left;
-      let shiftY = event.clientY - elem.getBoundingClientRect().top;
-
-      this.moveAt(event.pageX, event.pageY, elem, shiftX, shiftY);
+      let coords = elem.getBoundingClientRect();
+      let shiftX = event.clientX - coords.left;
+      let shiftY = event.clientY - coords.top;
 
       const onMouseMove = (event) => {
-        // const newLocation = {
-        //   x: borderCanvas.left,
-        //   y: borderCanvas.top
-        // };
+        const newLocation = {
+          x: limits.left,
+          y: limits.top,
+        };
 
-        // if (event.pageX > borderCanvas.right) {
-        //   newLocation.x = borderCanvas.right;
-        // } else if (event.pageX > borderCanvas.left) {
-        //   newLocation.x = event.pageX;
-        // }
+        if (event.pageX > limits.right) newLocation.x = limits.right;
+        else if (event.pageX > limits.left) newLocation.x = event.pageX;
 
-        // if (event.pageY > borderCanvas.bottom) {
-        //   newLocation.y = borderCanvas.bottom;
-        // } else if (event.pageY > borderCanvas.top) {
-        //   newLocation.y = event.pageY;
-        // }
+        if (event.pageY > limits.bottom) newLocation.y = limits.bottom;
+        else if (event.pageY > limits.top) newLocation.y = event.pageY;
 
-        this.moveAt(event.pageX, event.pageY, elem, shiftX, shiftY);
-        // this.moveAt(newLocation.x, newLocation.y, elem, shiftX, shiftY);
+        this.moveAt(elem, newLocation);
       };
 
       document.addEventListener('mousemove', onMouseMove);
@@ -110,15 +91,9 @@ class Figure {
       };
     };
   };
-};
-
-class Square extends Figure {
-  constructor(...args) {
-    super(...args);
-  };
 
   finall = (canvas) => {
-    if (canvas) this.clearCanvas();
+    // if (canvas) this.clearCanvas();
 
     this.createCanvas();
     this.createFigure();
@@ -126,37 +101,21 @@ class Square extends Figure {
   };
 };
 
-class Triangle extends Square {
-  constructor(...args) {
-    super(...args);
-  };
-};
-
-class Сircle extends Triangle {
-  constructor(...args) {
-    super(...args);
-  };
-};
-
-class Rectangle extends Сircle {
-  constructor(...args) {
-    super(...args);
-  };
-};
-
 addBtn.addEventListener('click', () => {
   const canvasBody = document.querySelector('.body-canvas');
 
-  const square = new Square('square', div);
-  const triangle = new Triangle('triangle', div);
-  const circle = new Сircle('circle', div);
-  const rectangle = new Rectangle('rectangle', div);
+  const square = new Figure('square', div);
+  const triangle = new Figure('triangle', div);
+  const circle = new Figure('circle', div);
+  const rectangle = new Figure('rectangle', div);
+
 
   figures.forEach(item => {
-    if (item.selected) {
-      console.log(item.value);
+    const { selected, value } = item;
 
-      switch (item.value) {
+    if (selected) {
+      // FIXME: fix this
+      switch (value) {
         case 'square':
           square.finall(canvasBody);
           break;
