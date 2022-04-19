@@ -1,6 +1,7 @@
 const canvasBlock = document.querySelector('.canvas-block');
 const figures = document.querySelectorAll('#figures > option');
 const colors = document.querySelectorAll('#colors > option');
+const weather = document.querySelector('.weather');
 const addBtn = document.querySelector('.add-btn');
 
 const div = document.createElement('div');
@@ -18,16 +19,13 @@ class Figure {
     this.div.setAttribute('class', bodyCanvas);
   };
 
-  clearCanvas = () => this.div.firstChild.remove();
-
   sortColor = (name) => {
     colors.forEach(color => {
       const { selected, value } = color;
+      const pattern = this.div.lastChild;
+      const transparent = 'transparent';
 
       if (selected) {
-        const pattern = this.div.firstChild;
-        const transparent = 'transparent';
-
         if (name === 'triangle') pattern.style.backgroundColor = transparent;
 
         return pattern.classList.add(value);
@@ -44,40 +42,33 @@ class Figure {
     this.sortColor(this.name);
   };
 
-  moveAt = (elem, newLocation) => {
-    const { x, y } = newLocation;
 
-    elem.style.left = `${x}px`;
-    elem.style.top = `${y}px`;
+  moveAt = (pageX, pageY, elem, shiftX, shiftY) => {
+    let rightSide = this.div.offsetWidth + this.div.offsetLeft - elem.offsetWidth;
+    let bottomSide = this.div.offsetHeight + this.div.offsetTop - elem.offsetHeight;
+    let leftPosition = (pageX - shiftX) < 0 ? 0 : pageX - shiftX;
+    let topPosition = (pageY - shiftY) < 0 ? 0 : pageY - shiftY;
+
+    if (leftPosition < this.div.offsetLeft) leftPosition = this.div.offsetLeft;
+    else if (leftPosition > rightSide) leftPosition = rightSide;
+
+    if (topPosition < this.div.offsetTop) topPosition = this.div.offsetTop;
+    else if (topPosition > bottomSide) topPosition = bottomSide;
+
+    elem.style.left = `${leftPosition}px`;
+    elem.style.top = `${topPosition}px`;
   };
 
   draggable = (elem) => {
-    let limits = {
-      top: this.div.offsetTop,
-      right: this.div.offsetWidth + this.div.offsetLeft - elem.offsetWidth,
-      bottom: this.div.offsetHeight + this.div.offsetTop - elem.offsetHeight,
-      left: this.div.offsetLeft,
-    };
-
     elem.onmousedown = (event) => {
-      let coords = elem.getBoundingClientRect();
+      const coords = elem.getBoundingClientRect();
+
       let shiftX = event.clientX - coords.left;
       let shiftY = event.clientY - coords.top;
 
-      const onMouseMove = (event) => {
-        const newLocation = {
-          x: limits.left,
-          y: limits.top,
-        };
+      this.moveAt(event.pageX, event.pageY, elem, shiftX, shiftY);
 
-        if (event.pageX > limits.right) newLocation.x = limits.right;
-        else if (event.pageX > limits.left) newLocation.x = event.pageX;
-
-        if (event.pageY > limits.bottom) newLocation.y = limits.bottom;
-        else if (event.pageY > limits.top) newLocation.y = event.pageY;
-
-        this.moveAt(elem, newLocation);
-      };
+      const onMouseMove = (event) => this.moveAt(event.pageX, event.pageY, elem, shiftX, shiftY);
 
       document.addEventListener('mousemove', onMouseMove);
 
@@ -86,49 +77,59 @@ class Figure {
         elem.onmouseup = null;
       };
 
-      elem.ondragstart = () => {
-        return false;
-      };
+      elem.ondragstart = () => false;
     };
   };
 
-  finall = (canvas) => {
-    // if (canvas) this.clearCanvas();
-
+  finall = () => {
     this.createCanvas();
     this.createFigure();
-    this.draggable(canvasBlock.firstChild.firstChild);
+    this.draggable(canvasBlock.firstChild.lastChild);
   };
 };
 
+const api = async () => {
+  const key = 'c063ae12e3968aae8ab0ba97c5913399';
+  const lat = 53.9;
+  const lon = 27.5667;
+  let promise = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${key}`);
+
+  try {
+    let json = await promise.json();
+
+    const {
+      name,
+      dt,
+      coord: { lon, lat },
+      weather: [{ main, description }],
+      wind: { speed },
+    } = json;
+    let date = new Date(dt * 1000);
+    let hours = date.getHours();
+    let minutes = date.getMinutes();
+    let seconds = date.getSeconds();
+
+    let formattedTime = `${hours}:${minutes}:${seconds}`;
+
+    weather.innerHTML = `
+      <div>Город: ${name}</div>
+      <div>Координаты: ${lat}, ${lon}</div>
+      <div>Погода действительна на: ${formattedTime}</div>
+      <div>Погода: ${main} / ${description}</div>
+      <div>Ветер: ${speed}</div>
+    `;
+  } catch {
+    console.log("Ошибка HTTP: " + promise.status);
+  }
+};
+
 addBtn.addEventListener('click', () => {
-  const canvasBody = document.querySelector('.body-canvas');
-
-  const square = new Figure('square', div);
-  const triangle = new Figure('triangle', div);
-  const circle = new Figure('circle', div);
-  const rectangle = new Figure('rectangle', div);
-
-
   figures.forEach(item => {
     const { selected, value } = item;
+    const figure = new Figure(value, div);
 
-    if (selected) {
-      // FIXME: fix this
-      switch (value) {
-        case 'square':
-          square.finall(canvasBody);
-          break;
-        case 'triangle':
-          triangle.finall(canvasBody);
-          break;
-        case 'circle':
-          circle.finall(canvasBody);
-          break;
-        case 'rectangle':
-          rectangle.finall(canvasBody);
-          break;
-      };
-    };
+    if (selected) figure.finall();
   });
+
+  api();
 });
