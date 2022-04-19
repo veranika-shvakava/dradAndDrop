@@ -1,6 +1,7 @@
 const canvasBlock = document.querySelector('.canvas-block');
 const figures = document.querySelectorAll('#figures > option');
 const colors = document.querySelectorAll('#colors > option');
+const weather = document.querySelector('.weather');
 const addBtn = document.querySelector('.add-btn');
 
 const div = document.createElement('div');
@@ -12,37 +13,22 @@ class Figure {
   };
 
   createCanvas = () => {
-    canvasBlock.append(this.div);
-    this.div.setAttribute('class', 'body-canvas');
-  };
+    const bodyCanvas = 'body-canvas';
 
-  clearCanvas = () => {
-    this.div.firstChild.remove();
+    canvasBlock.append(this.div);
+    this.div.setAttribute('class', bodyCanvas);
   };
 
   sortColor = (name) => {
     colors.forEach(color => {
-      if (color.selected) {
-        console.log(color.value);
+      const { selected, value } = color;
+      const pattern = this.div.lastChild;
+      const transparent = 'transparent';
 
-        const pattern = this.div.firstChild;
+      if (selected) {
+        if (name === 'triangle') pattern.style.backgroundColor = transparent;
 
-        if (name === 'triangle') pattern.style.backgroundColor = 'transparent';
-
-        switch (color.value) {
-          case 'red':
-            pattern.classList.add('firebrick');
-            break;
-          case 'blue':
-            pattern.classList.add('cornflowerblue');
-            break;
-          case 'green':
-            pattern.classList.add('seagreen');
-            break;
-          case 'sandy':
-            pattern.classList.add('sandybrown');
-            break;
-        };
+        return pattern.classList.add(value);
       };
     });
   };
@@ -56,47 +42,33 @@ class Figure {
     this.sortColor(this.name);
   };
 
+
   moveAt = (pageX, pageY, elem, shiftX, shiftY) => {
-    elem.style.left = pageX - shiftX + 'px';
-    elem.style.top = pageY - shiftY + 'px';
+    let rightSide = this.div.offsetWidth + this.div.offsetLeft - elem.offsetWidth;
+    let bottomSide = this.div.offsetHeight + this.div.offsetTop - elem.offsetHeight;
+    let leftPosition = (pageX - shiftX) < 0 ? 0 : pageX - shiftX;
+    let topPosition = (pageY - shiftY) < 0 ? 0 : pageY - shiftY;
+
+    if (leftPosition < this.div.offsetLeft) leftPosition = this.div.offsetLeft;
+    else if (leftPosition > rightSide) leftPosition = rightSide;
+
+    if (topPosition < this.div.offsetTop) topPosition = this.div.offsetTop;
+    else if (topPosition > bottomSide) topPosition = bottomSide;
+
+    elem.style.left = `${leftPosition}px`;
+    elem.style.top = `${topPosition}px`;
   };
 
   draggable = (elem) => {
-    /* const borderCanvas = {
-      top: this.div.offsetTop,
-      right: this.div.offsetWidth + this.div.offsetLeft - this.div.firstChild.offsetWidth,
-      bottom: this.div.offsetHeight + this.div.offsetTop - this.div.firstChild.offsetHeight,
-      left: this.div.offsetLeft,
-    };
-    console.log(`😈 ~ borderCanvas`, borderCanvas); */
-
     elem.onmousedown = (event) => {
-      let shiftX = event.clientX - elem.getBoundingClientRect().left;
-      let shiftY = event.clientY - elem.getBoundingClientRect().top;
+      const coords = elem.getBoundingClientRect();
+
+      let shiftX = event.clientX - coords.left;
+      let shiftY = event.clientY - coords.top;
 
       this.moveAt(event.pageX, event.pageY, elem, shiftX, shiftY);
 
-      const onMouseMove = (event) => {
-        // const newLocation = {
-        //   x: borderCanvas.left,
-        //   y: borderCanvas.top
-        // };
-
-        // if (event.pageX > borderCanvas.right) {
-        //   newLocation.x = borderCanvas.right;
-        // } else if (event.pageX > borderCanvas.left) {
-        //   newLocation.x = event.pageX;
-        // }
-
-        // if (event.pageY > borderCanvas.bottom) {
-        //   newLocation.y = borderCanvas.bottom;
-        // } else if (event.pageY > borderCanvas.top) {
-        //   newLocation.y = event.pageY;
-        // }
-
-        this.moveAt(event.pageX, event.pageY, elem, shiftX, shiftY);
-        // this.moveAt(newLocation.x, newLocation.y, elem, shiftX, shiftY);
-      };
+      const onMouseMove = (event) => this.moveAt(event.pageX, event.pageY, elem, shiftX, shiftY);
 
       document.addEventListener('mousemove', onMouseMove);
 
@@ -105,71 +77,59 @@ class Figure {
         elem.onmouseup = null;
       };
 
-      elem.ondragstart = () => {
-        return false;
-      };
+      elem.ondragstart = () => false;
     };
   };
-};
 
-class Square extends Figure {
-  constructor(...args) {
-    super(...args);
-  };
-
-  finall = (canvas) => {
-    if (canvas) this.clearCanvas();
-
+  finall = () => {
     this.createCanvas();
     this.createFigure();
-    this.draggable(canvasBlock.firstChild.firstChild);
+    this.draggable(canvasBlock.firstChild.lastChild);
   };
 };
 
-class Triangle extends Square {
-  constructor(...args) {
-    super(...args);
-  };
-};
+const api = async () => {
+  const key = 'c063ae12e3968aae8ab0ba97c5913399';
+  const lat = 53.9;
+  const lon = 27.5667;
+  let promise = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${key}`);
 
-class Сircle extends Triangle {
-  constructor(...args) {
-    super(...args);
-  };
-};
+  try {
+    let json = await promise.json();
 
-class Rectangle extends Сircle {
-  constructor(...args) {
-    super(...args);
-  };
+    const {
+      name,
+      dt,
+      coord: { lon, lat },
+      weather: [{ main, description }],
+      wind: { speed },
+    } = json;
+    let date = new Date(dt * 1000);
+    let hours = date.getHours();
+    let minutes = date.getMinutes();
+    let seconds = date.getSeconds();
+
+    let formattedTime = `${hours}:${minutes}:${seconds}`;
+
+    weather.innerHTML = `
+      <div>Город: ${name}</div>
+      <div>Координаты: ${lat}, ${lon}</div>
+      <div>Погода действительна на: ${formattedTime}</div>
+      <div>Погода: ${main} / ${description}</div>
+      <div>Ветер: ${speed}</div>
+    `;
+  } catch {
+    console.log("Ошибка HTTP: " + promise.status);
+  }
 };
 
 addBtn.addEventListener('click', () => {
-  const canvasBody = document.querySelector('.body-canvas');
-
-  const square = new Square('square', div);
-  const triangle = new Triangle('triangle', div);
-  const circle = new Сircle('circle', div);
-  const rectangle = new Rectangle('rectangle', div);
-
   figures.forEach(item => {
-    if (item.selected) {
-      console.log(item.value);
+    const { selected, value } = item;
+    const figure = new Figure(value, div);
 
-      switch (item.value) {
-        case 'square':
-          square.finall(canvasBody);
-          break;
-        case 'triangle':
-          triangle.finall(canvasBody);
-          break;
-        case 'circle':
-          circle.finall(canvasBody);
-          break;
-        case 'rectangle':
-          rectangle.finall(canvasBody);
-          break;
-      };
-    };
+    if (selected) figure.finall();
   });
+
+  api();
 });
