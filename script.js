@@ -48,13 +48,13 @@ class Figure {
   moveAt = (pageX, pageY, elem, shiftX, shiftY) => {
     let rightSide = this.div.offsetWidth + this.div.offsetLeft - elem.offsetWidth + shiftX;
     let bottomSide = this.div.offsetHeight + this.div.offsetTop - elem.offsetHeight + shiftY;
-    let leftPosition = (pageX - shiftX) <= this.div.offsetLeft ? this.div.offsetLeft : pageX - shiftX;
-    let topPosition = (pageY - shiftY) <= this.div.offsetTop ? this.div.offsetTop : pageY - shiftY;
+    let leftPosition = (pageX - shiftX) <= 0 ? 0 : pageX - shiftX;
+    let topPosition = (pageY - shiftY) <= 0 ? 0 : pageY - shiftY;
 
-    if (leftPosition <= this.div.offsetLeft) leftPosition = this.div.offsetLeft - elem.offsetWidth + shiftX;
+    if (leftPosition < this.div.offsetLeft) leftPosition = this.div.offsetLeft - elem.offsetWidth + shiftX;
     else if (leftPosition > rightSide) leftPosition = rightSide;
 
-    if (topPosition <= this.div.offsetTop) topPosition = this.div.offsetTop - elem.offsetHeight + shiftY;
+    if (topPosition < this.div.offsetTop) topPosition = this.div.offsetTop - elem.offsetHeight + shiftY;
     else if (topPosition > bottomSide) topPosition = bottomSide;
 
     elem.style.left = `${leftPosition - this.div.offsetLeft}px`;
