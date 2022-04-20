@@ -2,6 +2,8 @@ const canvasBlock = document.querySelector('.canvas-block');
 const figures = document.querySelectorAll('#figures > option');
 const colors = document.querySelectorAll('#colors > option');
 const weather = document.querySelector('.weather');
+const linen = document.querySelector('.linen');
+const apishka = document.querySelector('.api');
 const addBtn = document.querySelector('.add-btn');
 
 const div = document.createElement('div');
@@ -44,19 +46,19 @@ class Figure {
 
 
   moveAt = (pageX, pageY, elem, shiftX, shiftY) => {
-    let rightSide = this.div.offsetWidth + this.div.offsetLeft - elem.offsetWidth;
-    let bottomSide = this.div.offsetHeight + this.div.offsetTop - elem.offsetHeight;
-    let leftPosition = (pageX - shiftX) < 0 ? 0 : pageX - shiftX;
-    let topPosition = (pageY - shiftY) < 0 ? 0 : pageY - shiftY;
+    let rightSide = this.div.offsetWidth + this.div.offsetLeft - elem.offsetWidth + shiftX;
+    let bottomSide = this.div.offsetHeight + this.div.offsetTop - elem.offsetHeight + shiftY;
+    let leftPosition = (pageX - shiftX) <= this.div.offsetLeft ? this.div.offsetLeft : pageX - shiftX;
+    let topPosition = (pageY - shiftY) <= this.div.offsetTop ? this.div.offsetTop : pageY - shiftY;
 
-    if (leftPosition < this.div.offsetLeft) leftPosition = this.div.offsetLeft;
+    if (leftPosition <= this.div.offsetLeft) leftPosition = this.div.offsetLeft - elem.offsetWidth + shiftX;
     else if (leftPosition > rightSide) leftPosition = rightSide;
 
-    if (topPosition < this.div.offsetTop) topPosition = this.div.offsetTop;
+    if (topPosition <= this.div.offsetTop) topPosition = this.div.offsetTop - elem.offsetHeight + shiftY;
     else if (topPosition > bottomSide) topPosition = bottomSide;
 
-    elem.style.left = `${leftPosition}px`;
-    elem.style.top = `${topPosition}px`;
+    elem.style.left = `${leftPosition - this.div.offsetLeft}px`;
+    elem.style.top = `${topPosition - this.div.offsetTop}px`;
   };
 
   draggable = (elem) => {
@@ -73,6 +75,11 @@ class Figure {
       document.addEventListener('mousemove', onMouseMove);
 
       elem.onmouseup = () => {
+        document.removeEventListener('mousemove', onMouseMove);
+        elem.onmouseup = null;
+      };
+
+      elem.onmouseout = () => {
         document.removeEventListener('mousemove', onMouseMove);
         elem.onmouseup = null;
       };
@@ -106,8 +113,8 @@ const api = async () => {
     } = json;
     let date = new Date(dt * 1000);
     let hours = date.getHours();
-    let minutes = date.getMinutes();
-    let seconds = date.getSeconds();
+    let minutes = date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes();
+    let seconds = date.getSeconds() < 10 ? '0' + date.getSeconds() : date.getSeconds();
 
     let formattedTime = `${hours}:${minutes}:${seconds}`;
 
@@ -119,7 +126,7 @@ const api = async () => {
       <div>Ветер: ${speed}</div>
     `;
   } catch {
-    console.log("Ошибка HTTP: " + promise.status);
+    console.log('Ошибка HTTP: ' + promise.status);
   }
 };
 
@@ -131,5 +138,12 @@ addBtn.addEventListener('click', () => {
     if (selected) figure.finall();
   });
 
+  linen.classList.remove('hide');
+  apishka.classList.remove('hide');
   api();
 });
+
+if (!canvasBlock.contains(canvasBlock.firstChild)) {
+  linen.classList.add('hide');
+  apishka.classList.add('hide');
+};
